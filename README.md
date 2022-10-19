@@ -16,7 +16,22 @@ In python:
 from AgenciBR import .
 
 _If the data are from Ana_ ➔ **Ana.Ana**
-
+   
+   **Example: A = Ana.Ana(file)**
+   
+   A.dataset # return the dataset
+   
+   A.code #Return the 
+   
+   A.startdate #return the first date from dataset
+   
+   A.enddate  #return the end date from dataset
+   
+   A.len #return the length from dataset
+   
+   A.type_data #return the data informations (precipitation, temperature, wind, ...)
+   
+   
 _If the data are from Inemet_ ➔ **Inemet.Inemet** 
 
 _If the data are from Alexandre_ ➔ **Alexandre.Alexandre** 
