@@ -7,3 +7,25 @@
  - **MERGE** [http://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/]
  - **BR-DWGD** [https://github.com/AlexandreCandidoXavier/BR-DWGD]
  - **IDEAM** [http://www.ideam.gov.co]
+
+**Usage**
+> pip install AgenciBr  
+
+In python:
+
+from AgenciBR import .
+_If the data are from Ana_-> **Ana.Ana**
+
+_If the data are from Inemet_-> **Inemet.Inemet** 
+
+_If the data are from Alexandre_-> **Alexandre.Alexandre** 
+
+
+_If the data are from Merge_-> **Merge.Merge** 
+
+
+_If the data are from Ideam_-> **Ideam.Ideam** 
+
+
+ 
+ 
