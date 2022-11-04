@@ -13,34 +13,54 @@
 
 In python:
 
-from AgenciBR import .
+**Import Ana**
+```python
+from AgenciBr import Ana.Ana
+data = Ana.Ana('path file')
 
-_If the data are from Ana_ ➔ **Ana.Ana**
-   
-   **Example: A = Ana.Ana(file)**
-   
-   A.dataset # return the dataset
-   
-   A.code #Return the 
-   
-   A.startdate #return the first date from dataset
-   
-   A.enddate  #return the end date from dataset
-   
-   A.len #return the length from dataset
-   
-   A.type_data #return the data informations (precipitation, temperature, wind, ...)
-   
-   
-_If the data are from Inemet_ ➔ **Inemet.Inemet** 
+""" Propriedades """
+A.dataset # return the dataset
 
-_If the data are from Alexandre_ ➔ **Alexandre.Alexandre** 
+A.code #Return the 
 
+A.startdate #return the first date from dataset
 
-_If the data are from Merge_ ➔ **Merge.Merge** 
+A.enddate  #return the end date from dataset
 
+A.len #return the length from dataset
 
-_If the data are from Ideam_ ➔ **Ideam.Ideam** 
+A.type_data #return the data informations (precipitation, temperature, wind, ...)
+```
+
+**Import Inemet**
+
+```python
+from AgenciBr import Inemet
+
+a = Inemet.Inemet('file')
+```
+
+   **Import Merge**
+ ```python
+ from AgenciBr import Merge
+
+data = Merge.Merge('path file')
+ ```
+ 
+ **Import Alexandre**
+ ```python
+ from AgenciBr import Alexandre
+
+data = Alexandre.Alexandre('path file')
+ ```
+ 
+**Import Ideam**
+
+```python
+from AgenciBr import Ideam
+
+data = Ideam.Ideam('path file')
+```
 
 
  
