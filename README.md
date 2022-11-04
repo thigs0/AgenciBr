@@ -18,7 +18,7 @@ In python:
 from AgenciBr import Ana.Ana
 data = Ana.Ana('path file')
 
-""" Propriedades """
+""" Properties """
 A.dataset # return the dataset
 
 A.code #Return the 
@@ -37,7 +37,7 @@ A.type_data #return the data informations (precipitation, temperature, wind, ...
 ```python
 from AgenciBr import Inemet
 
-a = Inemet.Inemet('file')
+a = Inemet.Inemet('path file')
 ```
 
    **Import Merge**
