@@ -19,17 +19,17 @@ from AgenciBr import Ana.Ana
 data = Ana.Ana('path file')
 
 """ Properties """
-A.dataset # return the dataset
+data.dataset # return the dataset
 
-A.code #Return the 
+data.code #Return the 
 
-A.startdate #return the first date from dataset
+data.startdate #return the first date from dataset
 
-A.enddate  #return the end date from dataset
+data.enddate  #return the end date from dataset
 
-A.len #return the length from dataset
+data.len #return the length from dataset
 
-A.type_data #return the data informations (precipitation, temperature, wind, ...)
+data.type_data #return the data informations (precipitation, temperature, wind, ...)
 ```
 
 **Import Inemet**
@@ -37,7 +37,7 @@ A.type_data #return the data informations (precipitation, temperature, wind, ...
 ```python
 from AgenciBr import Inemet
 
-a = Inemet.Inemet('path file')
+data = Inemet.Inemet('path file')
 ```
 
    **Import Merge**
