@@ -18,18 +18,6 @@ In python:
 from AgenciBr import Ana.Ana
 data = Ana.Ana('path file')
 
-""" Properties """
-data.dataset # return the dataset
-
-data.code #Return the 
-
-data.startdate #return the first date from dataset
-
-data.enddate  #return the end date from dataset
-
-data.len #return the length from dataset
-
-data.type_data #return the data informations (precipitation, temperature, wind, ...)
 ```
 
 **Import Inemet**
