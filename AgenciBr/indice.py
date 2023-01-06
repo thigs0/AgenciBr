@@ -285,34 +285,38 @@ class Indice:
 
         import datetime
         import pandas as pd
-        if type_data == "pr":  # Se o dado for de precipitação, calculamos
+        if type_data == "pr":  # if data are precipitation
             df = self.dataframe
             df.iloc[:, 0] = pd.to_datetime(df.iloc[:, 0])
             # deixa apenas os dados de precipitação
             number_of_5day_heavy_precipitation_periods_per_time_period = 0
+            date = [0]
             maior = {0: 0, 1: 0}
+
             if time == 'y':
-                import pandas as pd
                 data = pd.to_datetime(df.iloc[:, 0])
                 serie = df.iloc[:, 1]
                 start = self.date(0).year
                 resul = [0]
                 cont = r = 0
-                while cont <= len(data) - 1:  # Enquanto não for o último ano
+                while cont < len(data) - 1:  # while is not the end year
                     temp = 0
                     for k in range(5):
                         if cont + k < len(data) - 2 and self.date(
                                 cont + k).year == start:  # Se continuamos no mesmo ano
                             temp += float(serie[cont + k])
+
                         else:
                             break
                     if temp > resul[r]:  # Se a sequência atual é maior que a anterior
                         resul[r] = temp
+                        date[r] = self.date(cont).month
 
                     if self.date(cont).year != start:  # pulamos de ano
                         r += 1
                         cont += 1
                         resul.append(0)
+                        date.append(0)
                         start += 1
                     else:
                         cont += 5
@@ -351,8 +355,6 @@ class Indice:
                             if k['num'] > maior[0]:
                                 maior = {0: k['num'], 1: k['month']}
                             number_of_5day_heavy_precipitation_periods_per_time_period += 1
-            else:  # time == 'd'
-                print('A função para dêcadas ainda está em construção')
 
             # Retorna
             if retornar == 'highest_five_day_precipitation_amount_per_time_period':
@@ -363,6 +365,8 @@ class Indice:
             elif retornar == 'number_of_5day_heavy_precipitation_periods_per_time_period':
                 return (range(self.date(0).year, self.date(-1).year + 1),
                         number_of_5day_heavy_precipitation_periods_per_time_period)
+            elif retornar == "date":
+                return  (range(self.date(0).year, self.date(-1).year + 1), date)
 
         raise "O dado não está definido como precipitação (pr)"  # Caso não, erro
 
@@ -588,11 +592,14 @@ class Indice:
         if type_data == 'pr':
             rx1day = np.array([])
             inicio = self.date(0).year  # Ano de inicio
-            fim = self.date(self.len).year  # Ano de termino
+            fim = self.date(self.len-1).year  # Ano de termino
             for ano in range(inicio, fim + 1):
                 for mes in range(1, 13):
-                    rx1day = np.append(rx1day,
-                                       np.max(self.ByMonth(ano, mes, var=var)))  # o máximo de precipitação diária no ano
+                    try:
+                        rx1day = np.append(rx1day,
+                                           np.max(self.ByMonth(ano, mes, var=var)))  # o máximo de precipitação diária no ano
+                    except:
+                        oi=1
             if with_x:
-                return pd.date_range(start =f'{inicio}-{self.date(0).month}-01',end =f'{fim}-{self.date(self.len-1).month}-1', freq = '1M'), rx1day
+                return pd.date_range(start =f'{inicio}-{self.date(0).month}-01',end =f'{fim}-{self.date(self.len-1).month}-1', freq = '1M'), rx1day[:-1]
             return rx1day
