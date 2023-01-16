@@ -15,7 +15,7 @@ In python:
 
 **Import Ana**
 ```python
-from AgenciBr import Ana.Ana
+from AgenciBr import Ana
 data = Ana.Ana('path file')
 
 ```
@@ -25,21 +25,21 @@ data = Ana.Ana('path file')
 ```python
 from AgenciBr import Inemet
 
-data = Inemet.Inemet('path file')
+data = Inemet('path file')
 ```
 
    **Import Merge**
  ```python
  from AgenciBr import Merge
 
-data = Merge.Merge('path file')
+data = Merge('path file')
  ```
  
  **Import Alexandre**
  ```python
  from AgenciBr import Alexandre
 
-data = Alexandre.Alexandre('path file')
+data = Alexandre('path file')
  ```
  
 **Import Ideam**
@@ -47,7 +47,7 @@ data = Alexandre.Alexandre('path file')
 ```python
 from AgenciBr import Ideam
 
-data = Ideam.Ideam('path file')
+data = Ideam('path file')
 ```
 
 
