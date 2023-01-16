@@ -16,7 +16,7 @@ In python:
 **Import Ana**
 ```python
 from AgenciBr import Ana
-data = Ana.Ana('path file')
+data = Ana('path file')
 
 ```
 
