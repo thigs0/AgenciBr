@@ -7,7 +7,9 @@
  - **MERGE** [http://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/]
    
    More:
-    http://ftp.cptec.inpe.br/modelos/tempo/MERGE/rozante_et.al.2010.pdf
+    - http://ftp.cptec.inpe.br/modelos/tempo/MERGE/rozante_et.al.2010.pdf,
+    - http://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/READ_ME-MERGE.pdf
+   
  - **BR-DWGD** [https://github.com/AlexandreCandidoXavier/BR-DWGD]
  - **IDEAM** [http://www.ideam.gov.co]
 
