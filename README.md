@@ -5,6 +5,8 @@
  - **ANA** [https://www.gov.br/ana/pt-br] or [https://www.snirh.gov.br/hidroweb/apresentacao]
  - **INEMET** [https://portal.inmet.gov.br]
  - **MERGE** [http://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/]
+   More:
+    http://ftp.cptec.inpe.br/modelos/tempo/MERGE/rozante_et.al.2010.pdf
  - **BR-DWGD** [https://github.com/AlexandreCandidoXavier/BR-DWGD]
  - **IDEAM** [http://www.ideam.gov.co]
 
