@@ -103,6 +103,22 @@ class Ana:
 
         df = pd.DataFrame({"code":code, "lat":lat, "lon":lon})
         return df
+    def report(self, path):
+        """
+        Save a txt file with importants informations
+
+        """
+        self.format1()
+        with open(path+"/report.txt", 'w') as f:
+            f.write(f"Station {self.city} {self.code}\n")
+            f.write(f"Empty data of : {self.empty_data()}\n")
+            f.write(f"Max value: {np.max(self.dataframe.iloc[:, 1])}\n")
+            v= self.dataframe.iloc[np.argmax(self.dataframe.iloc[:, 1]),0]
+            f.write(f"Date of max value: {v.day}/{v.month}/{v.year}\n")
+            f.write(f"Min value: {np.min(self.dataframe.iloc[:, 1])}\n")
+            v= self.dataframe.iloc[np.argmin(self.dataframe.iloc[:, 1]),0]
+            f.write(f"Date of min value: {v.day}/{v.month}/{v.year}\n")
+            f.close()
     def only_mondata(self, list=False):
         """
         Remove all columns that is not referent of month precipitation and day, in original data from Agenci
@@ -374,10 +390,13 @@ class Ana:
         """
         self.format1()
         return np.where(self.dataframe()['time'] == date)
-    def empty_data(self, type='relative'):
-        if self.type_data == "format1":
-            t = np.sum(np.isnan(self.dataframe['pr'].to_numpy("float32")))
-            return (t/self.len)*100
+    def empty_data(self, type='absolute'):
+        if self.type == "format1":
+            t = np.sum(np.isnan(self.dataframe.iloc[:, 1]))
+            if (type=="absolute"):
+                return t
+            elif (type=="relative"):
+                return (t/self.len)*100
         else:
             self.only_mondata()
             s = 0

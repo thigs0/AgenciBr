@@ -44,6 +44,23 @@ class Ideam():
                 break
         return np.array(self.dataframe[f'{var}'][inicio:final])
 
+    def report(self, path):
+        """
+        Save a txt file with importants informations
+
+        """
+        self.format1()
+        if (self.type_data == "precipitation"):
+            with open(path+"/report.txt", 'w') as f:
+                #f.write(f"Station {self.city} {self.code}\n")
+                f.write(f"Empty data of : {self.empty_data()}\n")
+                f.write(f"Max value: {np.max(self.dataframe.iloc[:, 1])}\n")
+                v= self.dataframe.iloc[np.argmax(self.dataframe.iloc[:, 1]),0]
+                f.write(f"Date of max value: {v.day}/{v.month}/{v.year}\n")
+                f.write(f"Min value: {np.min(self.dataframe.iloc[:, 1])}\n")
+                v= self.dataframe.iloc[np.argmin(self.dataframe.iloc[:, 1]),0]
+                f.write(f"Date of min value: {v.day}/{v.month}/{v.year}\n")
+                f.close()
     def byMonth(self, year, month, var):
         """
         English:
@@ -189,13 +206,15 @@ class Ideam():
         return self.dataframe['Fecha'][line_number]
 
     def empty_data(self, type="absolute"):
-        if self.type_data != "format1":
+        if self.type != "format1":
             self.format1()
-        if type == 'relative':
-            s = np.sum(np.isnan(self.dataframe[f'pr'].to_numpy("float32")))
-            s = (s / self.len) * 100
-            return s
-        return np.sum(np.isnan(self.dataframe[f'pr'].to_numpy("float32"))) # The absolute
+        if (self.type_data == "precipitation"):
+            if type == 'relative':
+                s = np.sum(np.isnan(self.dataframe.iloc[:,1]))
+                s = (s / self.len) * 100
+                return s
+            elif (type == "absolute"):
+                return np.sum(np.isnan(self.dataframe.iloc[:,1])) # The absolute
 
     def format1(self, comma_to_dot=True, grow=True, years=(0,0)):
         """
@@ -222,7 +241,7 @@ class Ideam():
 
                 """
         import pandas as pd
-        if years != (0,0) and self.type_data != "format1": # if is not format1 and select date
+        if years != (0,0) and self.type != "format1": # if is not format1 and select date
             self.dataframe['Fecha'] = pd.to_datetime(self.dataframe['Fecha'])
             self.dataframe['Valor'] = np.array(self.dataframe['Valor']).astype(float)
             self.dataframe = self.dataframe.rename(columns={'Fecha': 'time', 'Valor': 'pr'})
@@ -333,7 +352,8 @@ class Ideam():
             self.type = "format1"
             self.len = len(self.dataframe)
 
-        elif self.type_data != 'format1':
+        elif self.type != "format1":
+            print(self.dataframe)
             self.dataframe['Fecha'] = pd.to_datetime(self.dataframe['Fecha'])
             self.dataframe['Valor'] = np.array(self.dataframe['Valor']).astype(float)
             self.dataframe = self.dataframe.rename(columns={'Fecha': 'time', 'Valor': 'pr'})
@@ -355,7 +375,8 @@ class Ideam():
                                  end=self.enddate)  # change data to numpy datetime64
 
             self.dataframe = pd.DataFrame(list(zip(data, pr)), columns=['time', 'pr'])
-        self.type_data = 'format1'
+        self.type_data = 'precipitation'
+        self.type = "format1"
 
     def get_year(self,year, with_x=False, return_x0=False):
         """

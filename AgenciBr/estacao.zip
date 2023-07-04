@@ -1,5 +1,0 @@
-System.InvalidOperationException: Missing parameter: codEstDE.
-   at System.Web.Services.Protocols.ValueCollectionParameterReader.Read(NameValueCollection collection)
-   at System.Web.Services.Protocols.UrlParameterReader.Read(HttpRequest request)
-   at System.Web.Services.Protocols.HttpServerProtocol.ReadParameters()
-   at System.Web.Services.Protocols.WebServiceHandler.CoreProcessRequest()

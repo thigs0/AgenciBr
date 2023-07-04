@@ -1,0 +1,5 @@
+Empty data of : 1116
+Max value: 196.1
+Date of max value: 9/12/1990
+Min value: 0.0
+Date of min value: 2/2/1968

@@ -39,7 +39,7 @@ class Inemet:
                 line_codigo += 1
 
         def type_data(x):
-            if x == ("t_maxmin" or "pr"):  #Caso o usuário tenha digitado a variável
+            if x == ("t_maxmin" or "precipitation"):  #If user say the variable
                 return x
             df = pd.read_csv(path, skiprows=linha_inicio_df(path), nrows=50, on_bad_lines='skip')
             temp = str.lower(''.join(df.columns))
@@ -55,7 +55,7 @@ class Inemet:
             if 'precipitacao':
                 del df
                 del temp
-                return 'pr'
+                return 'precipitation'
 
         def date(linha):
 
@@ -135,7 +135,7 @@ class Inemet:
                 df.columns = ['Data', 'max', 'min', '']
                 df = df.drop(columns='')
                 return df
-            elif self.type_data == 'pr':
+            elif self.type_data == 'precipitation':
                 df = pd.read_csv(path, encoding=encoding,
                                  index_col=False, sep=sep, skiprows=linha_inicio_df(path))
                 df.columns = ['Data', 'pr', '']
@@ -161,7 +161,7 @@ class Inemet:
             self.altitude = alt(path)
             self.situacao = situacao(path)
             self.type= 'original'
-            self.cidade = cidade(path)
+            self.city = cidade(path)
             self.columns = self.dataframe.columns
             self.len = len(self.dataframe)
             self.list = False
@@ -172,37 +172,65 @@ class Inemet:
     def show(self):
         print(self.dataframe)
 
-    def empty_data(self, type='relative'):
+    def empty_data(self, type='absolute'):
         import math
 
         if self.type != "format1":
             self.format1(comma_to_dot=True)
         # if data is temperature
-        if self.type_data == 'temperatura':
-            cont_semdados = 0
-            for k in range(len(self.dataframe)):
-                if math.isnan(self.dataframe[self.columns[1]][k]):
-                    cont_semdados += 1
-
+        if self.type_data == 't_maxmin':
+            c = np.sum(np.isnan(self.dataframe.iloc[:,1])) # Nan of max temperature
+            c+= np.sum(np.isnan(self.dataframe.iloc[:,2])) #Nan of min temperature
             if type == 'relative':
-                return (cont_semdados / len(self.dataframe)) * 100
+                return (c / len(self.dataframe)) * 100
             elif type == 'absolute':
-                return round(cont_semdados, arredondar)
+                return c
             else:
                 raise "select one of two possibles types 'relative' or 'absolute'"
 
         # se estamos tratando de precipitação
-        elif self.type_data == 'pr':
-            cont_semdados = 0
-            for k in range(len(self.dataframe)):
-                if math.isnan(self.dataframe['pr'][k]):
-                    cont_semdados += 1
+        elif self.type_data == 'precipitation':
+            c = np.sum(np.isnan(self.dataframe.iloc[:, 1]))
             if type == 'relative':
-                return round((cont_semdados / len(self.dataframe)) * 100, arredondar)
+                return round((c / len(self.dataframe)) * 100)
             elif type == 'absolute':
-                return round(cont_semdados, arredondar)
+                return round(c)
             else:
                 raise "select one of two possibles types 'relative' or 'absolute'"
+    def report(self, path):
+        """
+        Save a txt file with importants informations
+
+        """
+        self.format1()
+        if (self.type_data == "t_maxmin"):
+            with open(path+"/report.txt", 'w') as f:
+                f.write(f"Station {self.city} {self.code}\n")
+                f.write(f"Empty data of {self.type_data} : {self.empty_data()}\n")
+                f.write(f"Max value of max temperature: {np.max(self.dataframe.iloc[:, 1])}\n")
+                f.write(f"Max value of min temperature: {np.max(self.dataframe.iloc[:, 2])}\n")
+                v= self.dataframe.iloc[np.argmax(self.dataframe.iloc[:, 1]),0]
+                f.write(f"Date of max value of max temperature: {v.day}/{v.month}/{v.year}\n")
+                v= self.dataframe.iloc[np.argmax(self.dataframe.iloc[:, 2]),0]
+                f.write(f"Date of max value of min temperature: {v.day}/{v.month}/{v.year}\n")
+                f.write(f"Min value of max temperature: {np.min(self.dataframe.iloc[:, 1])}\n")
+                f.write(f"Min value of min temperature: {np.min(self.dataframe.iloc[:, 2])}\n")
+                v= self.dataframe.iloc[np.argmin(self.dataframe.iloc[:, 1]),0]
+                f.write(f"Date of min value of max temperature: {v.day}/{v.month}/{v.year}\n")
+                v= self.dataframe.iloc[np.argmin(self.dataframe.iloc[:, 2]),0]
+                f.write(f"Date of min value of min temperature: {v.day}/{v.month}/{v.year}\n")
+                f.close()
+        elif (self.type_data == "precipitation"):
+            with open(path+"/report.txt", 'w') as f:
+                f.write(f"Station {self.city} {self.code}\n")
+                f.write(f"Empty data of {self.type_data}: {self.empty_data()}\n")
+                f.write(f"Max value: {np.max(self.dataframe.iloc[:, 1])}\n")
+                v= self.dataframe.iloc[np.argmax(self.dataframe.iloc[:, 1]),0]
+                f.write(f"Date of max value: {v.day}/{v.month}/{v.year}\n")
+                f.write(f"Min value: {np.min(self.dataframe.iloc[:, 1])}\n")
+                v= self.dataframe.iloc[np.argmin(self.dataframe.iloc[:, 1]),0]
+                f.write(f"Date of min value: {v.day}/{v.month}/{v.year}\n")
+                f.close()
 
     def plot(self):
         """
@@ -225,7 +253,7 @@ class Inemet:
             plt.plot(x, y, linewidth=0.1)
             plt.show()
 
-        elif self.type_data == 'pr':
+        elif self.type_data == 'precipitation':
             y = self.dataframe[colum[1]]
             x = self.dataframe[colum[0]]
             temp = []
@@ -304,7 +332,7 @@ class Inemet:
         """
 
         import pandas as pd
-        if self.type_data == 'pr':
+        if self.type_data == 'precipitation':
             import datetime
             # if change to format1 and complete the years
             if self.type != 'format1' and years != (0, 0):
@@ -746,7 +774,7 @@ class Inemet:
         :with_x: return the data, True or Not
         :return: Array with data of month select
         """
-        if self.type_data != "format'":
+        if self.type != "format1":
             self.format1()
         #x0 is the index wen start the year that we want
         x0, time = self.get_year(year, return_x0=True)
@@ -802,7 +830,7 @@ class Inemet:
 
             return ds.to_netcdf(local+f'/Dados{self.codigo}_D_{self.startdate.year}_{self.enddate.year}.nc')
 
-        elif self.type_data == 'temperatura':
+        elif self.type_data == 't_maxmin':
             # remove colunas em branco
             self.format1()
             df = self.dataframe.drop(['TEMPERATURA MINIMA, DIARIA(°C)'], axis=1)

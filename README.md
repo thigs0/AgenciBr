@@ -15,8 +15,8 @@ In python:
 
 **Import Ana**
 ```python
-from AgenciBr import Ana
-data = Ana('path file')
+from AgenciBr import Ana.Ana
+data = Ana.Ana('path file')
 
 """ Properties """
 data.dataset # return the dataset
@@ -29,7 +29,9 @@ data.enddate  #return the end date from dataset
 
 data.len #return the length from dataset
 
-data.type_data #return the data informations (precipitation, temperature, wind, ...)
+data.type_data #return the data informations (precipitation, temperature, t_maxmin, wind, ...)
+
+data.type #return if data is original, format1, format2 ...
 ```
 
 **Import Inemet**
@@ -37,21 +39,21 @@ data.type_data #return the data informations (precipitation, temperature, wind, 
 ```python
 from AgenciBr import Inemet
 
-data = Inemet('path file')
+data = Inemet.Inemet('path file')
 ```
 
    **Import Merge**
  ```python
  from AgenciBr import Merge
 
-data = Merge('path file')
+data = Merge.Merge('path file')
  ```
  
  **Import Alexandre**
  ```python
  from AgenciBr import Alexandre
 
-data = Alexandre('path file')
+data = Alexandre.Alexandre('path file')
  ```
  
 **Import Ideam**
@@ -59,7 +61,7 @@ data = Alexandre('path file')
 ```python
 from AgenciBr import Ideam
 
-data = Ideam('path file')
+data = Ideam.Ideam('path file')
 ```
 
 **Suported functions**
