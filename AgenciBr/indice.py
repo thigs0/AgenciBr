@@ -6,17 +6,17 @@ import pandas as pd
 
 # The index are based in: https://www.climdex.org/learn/indices/
 class Indice:
-    def __init__(self, df):
-        self.dataframe = df
-        self.len = len(self.dataframe)
+    def __init__(self, x, y):
+        self.x = x
+        self.y = pd.to_datetime(y)
+        self.len = len(self.x)
 
     def date(self, linha):
         '''
                 Encontra a altura da estação no dataframe
         '''
         import datetime
-        df = self.dataframe
-        df = df.iloc[linha, 0]
+        df = self.x[linha]
         try:  # Caso já esteja em Datetime
             temp = df.year
             del temp
@@ -25,16 +25,15 @@ class Indice:
             df = datetime.datetime.strptime(df, '%Y-%m-%d')
             return df
 
-    def ByYear(self, year, var):
+    def ByYear(self, year, with_x=False):
         """
         :param year: A data que queremos
         :param var: A variável do dataframe
-        :return: Retorna um array com todos os elementos do ano que você digitou
+        :return: Retorna um array com todos os valores no período anual
         """
         # percorre procurando por ano
         inicio, final = 0, 0
         for linha in range(self.len):
-            n = 0
             l = linha
             if self.date(linha).year == year:
                 inicio = linha  # linha de inicio
@@ -42,7 +41,9 @@ class Indice:
                     l += 1
                 final = l
                 break
-        return np.array(self.dataframe[f'{var}'][inicio:final])
+        if with_x:
+            return (np.array(self.x[inicio:final]) ,np.array(self.y[inicio:final]))
+        return np.array(self.y[inicio:final])
 
     def ByMonth(self, year, month, var):
         """
@@ -66,51 +67,56 @@ class Indice:
         return np.array(self.dataframe[f'{var}'][inicio:final])
         #  íncides de temperatura
 
-    def tx(self, with_x=False, type_data='t_maxmin', var='t_maxmin'):
+    def tx(self, with_x=False, type_data='t_maxmin'):
         """
-        Encontra a temperatura máxima da máxima anual.
-        Os dados necessitam ser diários
-        :param with_x:
+        Find the maximum temperature annual for the serie
+        The data need by daily
+        :param with_x: (Boolean) return the day when the maximum
         :param type_data:
         :param var:
         :return:
         """
-        if var.lower() not in ['t_maxmin', 'tmax', 'max']:
-            raise 'O arquivo não está citado "type" como temp_maxmin'
-        if type_data == 'pr':
-            raise "The file is precipitation data"
-        tx = np.array([])  # variável
-        inicio = self.date(0).year
-        fim = self.date(self.len - 1).year
+        inicio = self.date(0).year # return the initial year
+        fim = self.date(self.len - 1).year #the last year
 
-        for k in range(inicio, fim+1):  # percorre os anos
-            tx = np.append(tx, np.nanmax(self.ByYear(k, "max")))
+        tx = np.zeros(fim+1-inicio)  # variable
+        x = np.empty(fim+1-inicio, dtype='<U4')
+
+        for k in range(inicio, fim+1):  # range the years
+            x0,y0 = self.ByYear(k, with_x=True)
+            x[k-inicio] = x0[np.nanargmax(y0)]
+            tx[k-inicio]= np.nanmax(y0) 
+            
+            del x0 
+            del y0
         if with_x:
-            return np.arange(inicio, fim + 1), tx
+            return x, tx
         return tx
 
-    def tn(self, with_x=False, type_data='t_maxmin', var='min'):
+    def tn(self, with_x=False, type_data='t_maxmin'):
         """
-        Encontra a temperatura máxima da mínima anual.
-            Os dados necessitam ser diários
-        :param with_x:
+        Find the maximum temperature annual for the serie
+        The data need by daily
+        :param with_x: (Boolean) return the day when the maximum
         :param type_data:
         :param var:
         :return:
         """
-        if type_data != 't_maxmin':
-            raise 'O arquivo não está citado "type" como temp_maxmin'
+        inicio = self.date(0).year # return the initial year
+        fim = self.date(self.len - 1).year #the last year
 
-        if type_data == 'pr':
-            raise
-        tn = np.array([])  # variável
-        inicio = self.date(0).year
-        fim = self.date(self.len-1).year
-        for k in range(inicio, fim + 1):  # percorre os anos
-            tn = np.append(tn, np.nanmax(self.ByYear(k, "min")))
+        tn = np.zeros(fim+1-inicio)  # variable
+        x = np.empty(fim+1-inicio, dtype='<U4')
 
+        for k in range(inicio, fim+1):  # range the years
+            x0,y0 = self.ByYear(k, with_x=True)
+            x[k-inicio] = x0[np.nanargmax(y0)]
+            tn[k-inicio]= np.nanmax(y0) 
+            
+            del x0 
+            del y0
         if with_x:
-            return np.arange(inicio, fim + 1), tn
+            return x, tn
         return tn
 
     def tx90p(self, with_x=False, type_data='t_maxmin', var='tmax'):
