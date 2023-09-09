@@ -7,8 +7,8 @@ import pandas as pd
 # The index are based in: https://www.climdex.org/learn/indices/
 class Indice:
     def __init__(self, x, y):
-        self.x = x
-        self.y = pd.to_datetime(y)
+        self.x = pd.to_datetime(x)
+        self.y = y
         self.len = len(self.x)
 
     def date(self, linha):
@@ -198,151 +198,138 @@ class Indice:
                 return x, tn90p[0:-1]
             return tn90p[0:-1]
 
-    def fd(self, with_x=False, type_data='t_maxmin', var='time'):
+    def fd(self, with_x=False):
         """
-        Number of frost days by year
+        Number of frost days: annual count of days when TN (daily minimum temperature) <0°C
         :param type_data:  Tipo de informação contida no array
-        :param var: Nome da variável
-        :return: Retorna A quantidade de dias com Temperatura <0°C por ano
+        :return: Return the quantide of days  with temperature < 0°C by year
         """
-        if type_data == 't_maxmin':
-            fd = np.array([])  # Armazena os valores
-            inicio = self.date(0).year  # ano de inicio
-            fim = self.date(self.len).year  # Ano de termino
-            ind = 0
-            for ano in range(inicio, fim + 1):
-                t = self.ByYear(ano, var)  # vetor com dados de um ano
-                fd = np.append(fd, np.sum(t < 0))
-            if with_x:
-                return pd.to_datetime(np.arange(inicio, fim)), fd
-            return fd
+        inicio = self.date(0).year  # initial year
+        fim = self.date(self.len-1).year  # end year
+        fd = np.zeros(fim+1-inicio)  # values
 
-    def su(self, with_x=False, type_data='t_maxmin', var='time'):
+        for k in range(inicio, fim + 1):
+            t = self.ByYear(k)  # vetor com dados de um ano
+            fd[k-inicio] = np.sum(t < 0)
+        if with_x:
+            return np.arange(inicio, fim+1), fd
+        return fd
+
+    def su(self, with_x=False, type_data='t_maxmin'):
         """
-        Number of summer days by year
+        Number of summer days: annual count of days when TX (daily maximum temperature) >25°C
         :param with_x: Retorna o vetor com datas ou não (True, False)
         :param type_data: Tipe de data que está entrando
-        :param var: Como a variável está denominada no arquivo
         :return: Retorna a quantidade de dias da temperatura máxima > 25°C por ano
         """
-        if type_data == 't_maxmin':
-            su = np.array([])  # Vetor com dados
-            inicio = self.date(0).year  # Ano de inicio
-            fim = self.date(self.len).year  # Ano de termino
-            for ano in range(inicio, fim + 1):
-                t = self.ByYear(ano, var)  # vetor com dados de um ano
-                su = np.append(su, np.sum(t > 25))  # adiciona a soma do vetor True onde t>25
-            if with_x:
-                return pd.to_datetime(np.arange(inicio, fim)), su
-            return su
+        inicio = self.date(0).year  # initial year
+        fim = self.date(self.len-1).year  # end year
+        su = np.zeros(fim+1-inicio)  # values
 
-    def etr(self, with_x=False, type_data='t_maxmin', var=('tmax', 'tmin')):
+        for k in range(inicio, fim + 1):
+            t = self.ByYear(k)  # vetor com dados de um ano
+            su[k-inicio] = np.sum(t > 25)
+        if with_x:
+            return np.arange(inicio, fim+1), su
+        return su
+
+    def tr(self, with_x=False, type_data='t_maxmin', var=('tmax', 'tmin')):
         """
-        Extreme temperature range of monthly
+        TR, Number of tropical nights: Annual count of days when TN (daily minimum temperature) > 20°C.
         :param with_x: Retorna o vetor com datas ou não (True, False)
         :param type_data: Tipe de data que está entrando
         :param var: um vetor em que a primeira componente é o nome da temperatura máxima e o segundo da temperatura mínima
         :return: Retorna A temperatura máxima mensal menos a mínima
         """
-        etr = np.array([])  # variável de saída
-        inicio = self.date(0).year  # ano de inicio
-        fim = self.date(self.len).year  # Ano de termino
-        for ano in range(inicio, fim + 1):
-            for mes in range(1, 13):
-                etr = np.append(etr, np.max(self.ByMonth(ano, mes, var[0])) - np.max(self.ByMonth(ano, mes, var[1])))
+        inicio = self.date(0).year  # initial year
+        fim = self.date(self.len-1).year  # end year
+        tr = np.zeros(fim+1-inicio)  # values
+
+        for k in range(inicio, fim + 1):
+            t = self.ByYear(k)  # vetor com dados de um ano
+            tr[k-inicio] = np.sum(t > 20)
         if with_x:
-            return np.arange(np.datetime64(f"{inicio}-{self.date(0).month}-01"),
-                             np.datetime64(f"{fim + 1}-{self.date(self.len).month}-01"),
-                             np.timedelta64(1, 'M'),
-                             dtype='datetime64[M]'), etr
-        return etr
+            return np.arange(inicio, fim+1), tr
+        return tr
 
     # índices de chuvas
-    def rnnmm(self, number, with_x=False, type_data='pr', var='pr'):
+    def rnnmm(self, number, with_x=False, type_data='pr'):
         """
-        Annual count of days when PRCP ≥ nn mm, where nn is a user-defined threshold
-        Let RRij be the daily precipitation amount on day i in period j. Count the number of days where RRij ≥ nnmm.
+        Rnnmm Annual count of days when PRCP≥ nnmm, nn is a user defined threshold
         :param with_x: Retorna o array com as datas de cada dado
         :param type_data:
         :param var:
         :return:
         """
-        if type_data == 'pr':
-            rnnmm = np.array([])  # Vetor com dados
-            inicio = self.date(0).year  # Ano de inicio
-            fim = self.date(self.len-1).year  # Ano de termino
-            for ano in range(inicio, fim + 1):
-                t = self.ByYear(ano, var)  # vetor com dados de um ano
-                rnnmm = np.append(rnnmm, np.sum(t > number))  # adiciona a soma do vetor True onde t>25
-            if with_x:
-                print(pd.to_datetime(np.arange(inicio, fim+1)))
-                return np.arange(inicio, fim+1), rnnmm
-            return rnnmm
+
+        inicio = self.date(0).year  # start year
+        fim = self.date(self.len-1).year  # End year
+        rnnmm = np.zeros(fim+1-inicio)  # Data
+
+        for ano in range(inicio, fim + 1):
+            t = self.ByYear(ano)  #
+            rnnmm = np.append(rnnmm, np.sum(t >= number))  # number of values > number
+        if with_x:
+            return np.arange(inicio, fim+1), rnnmm
+        return rnnmm
 
     def rx5day(self, valor=1, retornar='number_of_5day_heavy_precipitation_periods_per_time_period', time='y',
                selbyyear=0,
                with_x=False, type_data='pr'):
         '''
-        Rx5day analisa o aculmulado em de 5 dias em 5 dias durante todo o ano e retorna a data com maior valor
+        rx5day is a function that return the highest 5 days acumulatted in a year
         :param valor: valor fixo do mínimo que consideramos
         :param retornar:Opções para retornar: highest_five_day_precipitation_amount_per_time_period, que é uma lista 0 é o numero e 1 é o mês
         ; number_of_5day_heavy_precipitation_periods_per_time_period
         :time:
-        :return:
+        :return: The value
         '''
 
         import datetime
         import pandas as pd
-        if type_data == "pr":  # if data are precipitation
-            df = self.dataframe
-            df.iloc[:, 0] = pd.to_datetime(df.iloc[:, 0])
-            # deixa apenas os dados de precipitação
-            number_of_5day_heavy_precipitation_periods_per_time_period = 0
-            date = [0]
-            maior = {0: 0, 1: 0}
 
-            if time == 'y':
-                data = pd.to_datetime(df.iloc[:, 0])
-                serie = df.iloc[:, 1]
-                start = self.date(0).year
-                resul = [0]
-                cont = r = 0
-                while cont < len(data) - 1:  # while is not the end year
-                    temp = 0
-                    for k in range(5):
-                        if cont + k < len(data) - 2 and self.date(
-                                cont + k).year == start:  # Se continuamos no mesmo ano
-                            temp += float(serie[cont + k])
+        # deixa apenas os dados de precipitação
+        number_of_5day_heavy_precipitation_periods_per_time_period = 0
+        date = [0]
+        maior = {0: 0, 1: 0}
 
-                        else:
-                            break
-                    if temp > resul[r]:  # Se a sequência atual é maior que a anterior
-                        resul[r] = temp
-                        date[r] = self.date(cont).month
+        start = self.date(0).year 
+        resul = [0]
+        resul = np.zeros(self.date(self.len-1).year + 1-start)
+        cont = r = 0
+        while cont < len(data) - 1:  # while is not the end year
+            temp = 0
+            for k in range(5):
+                if cont + k < len(data) - 2 and self.date(
+                        cont + k).year == start:  # Se continuamos no mesmo ano
+                    temp += float(self.y[cont + k])
 
-                    if self.date(cont).year != start:  # pulamos de ano
-                        r += 1
-                        cont += 1
-                        resul.append(0)
-                        date.append(0)
-                        start += 1
-                    else:
-                        cont += 5
-                number_of_5day_heavy_precipitation_periods_per_time_period = resul
-
-            # Retorna
-            if retornar == 'highest_five_day_precipitation_amount_per_time_period':
-                if with_x:  # retornamos o eixo x também
-                    return np.arange(self.date(0).year, self.date(-1).year + 1), maior
                 else:
-                    return maior
-            elif retornar == 'number_of_5day_heavy_precipitation_periods_per_time_period':
-                return (range(self.date(0).year, self.date(-1).year + 1),
-                        number_of_5day_heavy_precipitation_periods_per_time_period)
-            elif retornar == "date":
-                return  (range(self.date(0).year, self.date(-1).year + 1), date)
+                    break
+            if temp > resul[r]:  # Se a sequência atual é maior que a anterior
+                resul[r] = temp
+                date[r] = self.date(cont).month
 
-        raise "O dado não está definido como precipitação (pr)"  # Caso não, erro
+            if self.date(cont).year != start:  # pulamos de ano
+                r += 1
+                cont += 1
+                date.append(0)
+                start += 1
+            else:
+                cont += 5
+        number_of_5day_heavy_precipitation_periods_per_time_period = resul
+
+        # Retorna
+        if retornar == 'highest_five_day_precipitation_amount_per_time_period':
+            if with_x:  # retornamos o eixo x também
+                return np.arange(self.date(0).year, self.date(-1).year + 1), maior
+            else:
+                return maior
+        elif retornar == 'number_of_5day_heavy_precipitation_periods_per_time_period':
+            return (range(self.date(0).year, self.date(-1).year + 1),
+                    number_of_5day_heavy_precipitation_periods_per_time_period)
+        elif retornar == "date":
+            return  (range(self.date(0).year, self.date(-1).year + 1), date)
 
     def cdd(self, with_x=False, type_data='pr'):
         serie = np.array(self.dataframe.iloc[:, 1]).astype(float)
