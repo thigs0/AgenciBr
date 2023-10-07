@@ -688,7 +688,7 @@ class Inemet:
             ds.to_netcdf(local + f'/Dados{self.codigo}_D_{self.startdate.year}_{self.enddate.year}_min.nc')
 
     def to_csv(self, local=""):
-        self.dataframe.to_csv(local)
+        self.dataframe.to_csv(local, index=False)
 
     def date(self, linha):
 
