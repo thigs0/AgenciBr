@@ -929,7 +929,7 @@ class Inemet:
         
         #Coleta dados das estações
         for i in dir:
-            df = pd.read_csv(path+"/"+dir)
+            df = pd.read_csv(path+"/"+i)
             est_min[i] = df["min"]
             est_max[i] = df["max"]
 
