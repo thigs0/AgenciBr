@@ -919,7 +919,7 @@ class Inemet:
         import pandas as pd
         import numpy as np
         import os
-        
+
         self.format1()
         dir = os.listdir(path)
         n = len(dir)
