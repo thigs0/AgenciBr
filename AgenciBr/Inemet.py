@@ -934,6 +934,7 @@ class Inemet:
             est_min[i] = df["min"]
             est_max[i] = df["max"]
 
+        print(est_min)
         # completa estação
         for i in range(self.len):
             if self.dataframe["max"][i] == np.NaN:
