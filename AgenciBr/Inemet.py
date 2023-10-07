@@ -882,7 +882,7 @@ class Inemet:
             for i, k in enumerate(os.listdir(self.path)):
                     a = Inemet(self.path + "/" + k)
                     a.format1(years=years)
-                    if a.empty_data()< erro:
+                    if a.empty_data() < erro:
                         if c == 0:
                             data = np.array([a.dataframe["pr"]])
                             posi.append([a.lat, a.lon, a.altitude, f"{a.code}", f"Ana-{a.code}"])
@@ -915,3 +915,32 @@ class Inemet:
             """)
             climatol.close()
         os.system("Rscript inemet/climatol.r")
+    def completa(self, path):
+        import pandas as pd
+        import numpy as np
+
+        self.format1()
+        dir = os.listdir(path)
+        n = len(dir)
+        df = pd.read_csv(path+"/"+dir[0])
+        m = len(df)
+        est_min = np.zeros(n, m) 
+        est_max = np.zeros(n, m) 
+        
+        #Coleta dados das estações
+        for i in dir:
+            df = pd.read_csv(path+"/"+dir)
+            est_min[i] = df["min"]
+            est_max[i] = df["max"]
+
+        # completa estação
+        for i in range(self.len):
+            if self.dataframe["max"][i] == np.NaN:
+                t = np.isnan(est_max[i])
+                self.dataframe["max"][i] = sum(est_max)/t
+            if self.dataframe["min"][i] == np.NaN:
+                t = np.isnan(est_min[i])
+                self.dataframe["min"][i] = sum(est_min)/t
+
+
+            
