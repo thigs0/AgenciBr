@@ -1,16 +1,3 @@
-Metadata-Version: 2.1
-Name: AgenciBr
-Version: 0.1.8
-Summary: Package to work with data from brazilian agenci
-Home-page: UNKNOWN
-Author: Thiago Santos
-Author-email: tthiagosantos38@gmail.com
-License: MIT License
-Keywords: Ana,Inemet,Ideam
-Platform: UNKNOWN
-Description-Content-Type: text/markdown
-License-File: LICENSE
-
 # AgenciBr
 
 > The objective is create a package that help to usa data of **Agencia Nacional de Águas (ANA)**, **Instituto Nacional de Meteorologia (INEMET)**, **Merge**, **Brazilian Daily Weather Gridded Data (BR-DWGD)** and **Instituto de Hidrología, Meteorología y Estudios Ambientales (IDEAM)**. All the data above is from Brazil, minus the **IDEAM** that is from Colombia.
@@ -165,7 +152,5 @@ We work with datasets, to padronize, we create the function format2 that exists 
 | R10MM   |     |        |        |       |       |
 | R20MM   |     |        |        |       |       |
 | R99PTOT |     |        |        |       |       |
-
-
 
 
