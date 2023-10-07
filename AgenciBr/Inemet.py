@@ -920,7 +920,6 @@ class Inemet:
         import numpy as np
         import os
 
-        self.format1()
         dir = os.listdir(path)
         n = len(dir)
         df = pd.read_csv(path+"/"+dir[0])
