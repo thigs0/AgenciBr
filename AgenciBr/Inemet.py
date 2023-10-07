@@ -927,10 +927,12 @@ class Inemet:
         m = len(df)
         est_min = np.zeros(n, m) 
         est_max = np.zeros(n, m) 
+        print(est_min)
         
         #Coleta dados das estações
         for i in dir:
             df = pd.read_csv(path+"/"+i)
+            print(df)
             est_min[i] = df["min"]
             est_max[i] = df["max"]
 
