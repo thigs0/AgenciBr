@@ -1,38 +1,67 @@
 import os
+import xarray as xr
+import pandas as pd
 import numpy as np
 import shutil
 from datetime import datetime, timedelta
+import datetime
 from zipfile import ZipFile
 import requests
 from matplotlib import pyplot as plt
 
 class Inemet:
-    def __init__(self, path, encoding='utf-8', sep=';', type=None, list=False):
+    def __init__(self):
 
-        """
-        :param path:
-        :param encoding:
-        :param sep:
-        :param type: Tipo de dados que tem no arquivo t_maxmin: Temperatura máxima e mínima
-        """
+        self.type_data = None
+        self.dataframe = None
+        self.code = None
+        self.startdate = None
+        self.enddate = None
+        self.lat, self.lon = None, None
+        self.altitude = None
+        self.situacao = None
+        self.type= 'original' #original, multiple-file
+        self.city = None
+        self.columns = None
+        self.len = None
 
-        def linha_inicio_df(arquivo):
-            """Abre o arquivo porém pula linhas em branco que por padrão são 4
-            No inicio a primeira linha é transformada em head. Portanto, somamos+4+1"""
-            df = pd.read_csv(arquivo, sep=';', on_bad_lines='skip',
-                             encoding='latin-1')
-            return len(df) + 2
+    def read_mfcsv(self, path:str, encoding='utf-8', sep=';', type=None): # read multiple files of path in one dataframe
+        df = pd.DataFrame()
+        for k in os.listdir(path):
+            print(path+"/"+k)
+            print(path+"/"+k)
+            self.read_csv(path+"/"+k, encoding=encoding, sep=sep )
+            df = pd.concat([df, self.dataframe ])
+        self.dataframe = df
+        self.type = 'multiple-file'
+    def read_csv(self, path:str, encoding='utf-8', sep=';', type=None) -> None:
+        def dataframe():
+            if self.type_data == 't_maxmin':
+               df = pd.read_csv(path, encoding=encoding, index_col=False, sep=sep, skiprows=linha_inicio_df(path))
+               df.columns = ['Data', 'max', 'min','']
+               df = df.drop(columns='')
+               return df
+            elif self.type_data == 'precipitation':
+                df = pd.read_csv(path, encoding=encoding,
+                                 index_col=False, sep=sep, skiprows=linha_inicio_df(path))
+                df.columns = ['Data', 'pr', '']
+                df = df.drop(columns='')
+                return df
+            elif self.type_data == 't_med':
+                df = pd.read_csv(path, encoding=encoding,
+                                 index_col=False, sep=sep, skiprows=linha_inicio_df(path))
+                df.columns = ['Data', 'med', '']
+                df = df.drop(columns='')
 
-        def find_cod(df):
-            """
-            Encontra o código da estação no dataframe
-            """
+                return df
+        def linha_inicio_df(arquivo): # jump 4 blanks rows plus 1
+            return  len(pd.read_csv(arquivo, sep=';', on_bad_lines='skip',encoding='latin-1')) + 2
+        def find_cod(df): # Find the code of station
             line_codigo = 0
 
             while True:
                 temp = str(df.loc[line_codigo]).split()
-                # se código aparece na linha, sabemos que é esta
-                if 'Codigo' in temp:
+                if 'Codigo' in temp:  #If the code appears at row, we get it
                     ind = temp.index('Codigo')
                     temp = temp[ind + 2]
                     return temp
@@ -45,7 +74,6 @@ class Inemet:
             temp = str.lower(''.join(df.columns))
             if 'temperatura' in temp:
                 if "minima" and 'maxima' in temp:
-
                     del df
                     del temp
                     return 't_maxmin'
@@ -57,14 +85,8 @@ class Inemet:
                 del temp
                 return 'precipitation'
 
-        def date(linha):
-
-            """
-                        Encontra a altura da estação no dataframe
-                        """
-            import datetime
-            df = self.dataframe
-            df = df.iloc[linha, 0]
+        def date(linha): # find the high of the station
+            df = self.dataframe.iloc[linha, 0]
             df = datetime.datetime.strptime(df, '%Y-%m-%d')
             return df
 
@@ -75,8 +97,7 @@ class Inemet:
             cord = {'lat': '', 'lon': ''}
             while True:
                 temp = str(df.loc[line_codigo]).split()
-                # se código aparece na linha, sabemos que é esta
-                if 'Latitude:' in temp:
+                if 'Latitude:' in temp:  #If user say the variable
                     ind = temp.index('Latitude:')
                     temp = temp[ind+1]
                     cord['lat'] = temp
@@ -95,8 +116,7 @@ class Inemet:
             line_codigo = 0
             while True:
                 temp = str(df.loc[line_codigo]).split()
-                # If the code appear at line
-                if 'Altitude:' in temp:
+                if 'Altitude:' in temp: # If the code appear at line
                     ind = temp.index('Altitude:')
                     temp = temp[ind + 1]
                     return temp
@@ -121,64 +141,44 @@ class Inemet:
             line_codigo = 0
             while True:
                 temp = str(df.loc[line_codigo]).split()
-                # se código aparece na linha, sabemos que é esta
                 if 'Nome:' in temp:
                     ind = temp.index('Nome:')
                     temp = temp[ind + 1]
                     return temp
                 line_codigo += 1
 
-        def dataframe():
-            if self.type_data == 't_maxmin':
-                df = pd.read_csv(path, encoding=encoding,
-                                         index_col=False, sep=sep, skiprows=linha_inicio_df(path))
-                df.columns = ['Data', 'max', 'min','']
-                df = df.drop(columns='')
-                return df
-            elif self.type_data == 'precipitation':
-                df = pd.read_csv(path, encoding=encoding,
-                                 index_col=False, sep=sep, skiprows=linha_inicio_df(path))
-                df.columns = ['Data', 'pr', '']
-                df = df.drop(columns='')
-                return df
-            elif self.type_data == 't_med':
-                df = pd.read_csv(path, encoding=encoding,
-                                 index_col=False, sep=sep, skiprows=linha_inicio_df(path))
-                df.columns = ['Data', 'med', '']
-                df = df.drop(columns='')
 
-                return df
 
-        import pandas as pd
-        if not list:
-            self.type_data = type_data(type)
-            self.dataframe = dataframe()
-            self.code = find_cod(pd.read_csv(path, nrows=linha_inicio_df(path), index_col=False,
-                                               on_bad_lines='skip', encoding='latin-1'))
-            self.startdate = date(0)
-            self.enddate = date(len(self.dataframe)-1)
-            self.lat, self.lon = coords(path)['lat'], coords(path)['lon']
-            self.altitude = alt(path)
-            self.situacao = situacao(path)
-            self.type= 'original'
-            self.city = cidade(path)
-            self.columns = self.dataframe.columns
-            self.len = len(self.dataframe)
-            self.list = False
-        else:
-            self.path = path
-            self.list = True
+        self.dataframe = dataframe()
+        self.type_data = type_data(type)
+        self.dataframe = dataframe()
+        self.code = find_cod(pd.read_csv(path, nrows=linha_inicio_df(path), index_col=False,
+                                       on_bad_lines='skip', encoding='latin-1'))
+        self.startdate = date(0)
+        self.enddate = date(len(self.dataframe)-1)
+        self.lat, self.lon = coords(path)['lat'], coords(path)['lon']
+        self.altitude = alt(path)
+        self.situacao = situacao(path)
+        self.type= 'original'
+        self.city = cidade(path)
+        self.columns = self.dataframe.columns
+        self.len = len(self.dataframe)
 
+        self.dataframe['code'] = self.code
+        self.dataframe['height'] = self.altitude
+        self.dataframe['city'] = self.city
+        self.dataframe['type_data'] = self.type_data
+        self.dataframe['lat'] = self.lat 
+        self.dataframe['lon'] = self.lon 
+        self.dataframe['situation'] = self.situacao
+            
     def show(self):
         print(self.dataframe)
 
     def empty_data(self, type='absolute'):
-        import math
-
         if self.type != "format1":
             self.format1(comma_to_dot=True)
-        # if data is temperature
-        if self.type_data == 't_maxmin':
+        if self.type_data == 't_maxmin': # if data is temperature
             cmax = np.sum(np.isnan(self.dataframe.iloc[:,1])) # Nan of max temperature
             cmin = np.sum(np.isnan(self.dataframe.iloc[:,2])) #Nan of min temperature
             if type == 'relative':
@@ -197,11 +197,7 @@ class Inemet:
                 return round(c)
             else:
                 raise "select one of two possibles types 'relative' or 'absolute'"
-    def report(self, path):
-        """
-        Save a txt file with importants informations
-
-        """
+    def report(self, path): #save the file with imoprtants informations
         self.format1()
         if (self.type_data == "t_maxmin"):
             with open(path, 'w') as f:
@@ -359,9 +355,7 @@ class Inemet:
 
         import pandas as pd
         if self.type_data == 'precipitation':
-            import datetime
-            # if change to format1 and complete the years
-            if self.type != 'format1' and years != (0, 0):
+            if self.type != 'format1' and years != (0, 0):  # if change to format1 and complete the years
                 from datetime import datetime
 
                 # organize the file from smaller to larger
@@ -607,7 +601,6 @@ class Inemet:
 
     #Convert to another version
     def to_netcdf4(self, local=''):
-        import xarray as xr
         if self.type_data == 'precipitacao':
             self.format1(grow=False)
             df = self.dataframe
@@ -687,15 +680,11 @@ class Inemet:
 
             ds.to_netcdf(local + f'/Dados{self.codigo}_D_{self.startdate.year}_{self.enddate.year}_min.nc')
 
-    def to_csv(self, local=""):
-        self.dataframe.to_csv(local, index=False)
+    def to_csv(self, path=""):
+        self.dataframe.to_csv(path, index=False)
 
     def date(self, linha):
-
-        """
-                    Encontra a altura da estação no dataframe
-                    """
-        import datetime
+        #       Encontra a altura da estação no dataframe
         df = self.dataframe
         df = df.iloc[linha, 0]
         df = datetime.datetime.strptime(df, '%Y-%m-%d')
@@ -791,7 +780,7 @@ class Inemet:
         return ind
 
     #Download
-    def download(self, path,  year_start=2000, year_end=datetime.now().year, file_save='zip', list_station='all'):
+    def download(self, path,  year_start=2000, year_end=datetime.datetime.now().year, file_save='zip', list_station='all'):
         """
         Download the data from site https://portal.inmet.gov.br/dadoshistoricos
         and change automatic to a model that you need

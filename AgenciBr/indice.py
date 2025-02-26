@@ -3,6 +3,18 @@ import datetime
 import numpy as np
 import pandas as pd
 
+def heatwave(df:pd.DataFrame, percent:pd.DataFrame) -> pd.dataFrame:
+    #df is the dataframe with tha curent information of maximum temperature
+    #percent is the referenc of temperature
+    df.time, percent.time = pd.to_datetime(df.time), pd.to_datetime(percent.time)
+
+    hotdays = [ df[(( df.loc[i, 'year'] == i.year ) & ( df.loc[i, 'month'] == i.month ) & (percent.loc[i, 'day'] == i.day))] > percent[ (( percent.loc[i, 'month'] == i.month ) & ( df.loc[i, 'day'] == i.day )) ] for i in df.time ]
+    df['hotdays'] = hotdays
+    i = 0
+    while i < len(df.time)
+        df.loc[i, 'heatwave'] = 1 if df.loc[i, i+2, 'hotdays'].sum() == 3 else 0
+    return df
+
 # The index are based in: https://www.climdex.org/learn/indices/
 class Indice:
     def __init__(self, df):
