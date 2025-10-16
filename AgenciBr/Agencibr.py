@@ -2,12 +2,12 @@ import numpy as np
 import pandas as pd
 
 class Agencibr():
-    def __init__(self, file=None, code=np.NaN):
+    def __init__(self, file=None, code=np.nan):
         self.file = file
         self.code = code
 
-    def download(self,path="./teste.csv", code=np.NaN, format='csv', tipo_especifico=False, 
-                 save_zip=False, state="NaN", city="Nan"):
+    def download(self,path="./teste.csv", code=np.nan, format='csv', tipo_especifico=False, 
+                 save_zip=False, state="nan", city="nan"):
         """
         Download the Ana data. Code from https://github.com/joaohuf/Ferramentas_HidroWeb
         Data os stations code etc, from http://telemetriaws1.ana.gov.br/EstacoesTelemetricas.aspx
@@ -25,7 +25,7 @@ class Agencibr():
 
         # Link onde estão os dados das estações convencionaiss convencionais
         BASE_URL = 'http://www.snirh.gov.br/hidroweb/rest/api/documento/convencionais'
-        if code == np.NaN:
+        if code == np.nan:
             raise("Station don't have code")
         
         def unzip_station_data(station_raw_data, dir, tipo_especifico):

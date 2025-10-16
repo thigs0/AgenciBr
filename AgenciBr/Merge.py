@@ -1,128 +1,46 @@
 import os
 import xarray as xr
+import requests
+import numpy as np
+import pandas as pd
+from datetime import datetime as dt
+from datetime import date
+
+now = dt.now()
 class Merge:
-    from datetime import datetime
-
-    def __init__(self, arquivo=None):
-        if arquivo!= None:
-            self.dataset =arquivo
-    
-    def download(self, path_save, year_start=2000, year_end=datetime.now().year, date=None, to="original"):
-        import datetime
-        import requests
-
-        total = (year_end-year_start)*360
-        cont=0
-        def download_file(url, endereco, nome):
-            # acessa o site
-            resposta = requests.get(url)
-            # Acessa o conteúdo e salva em um arquivo
-            if resposta.status_code == requests.codes.OK:
-                with open(endereco + f'/{nome}.grib2', 'wb') as novo:
-                    novo.write(resposta.content)
-            else:
-                resposta.raise_for_status()
-        if ( date != None):
-            if ( date.month < 10):
-                if ( date.day < 10):
-                    download_file(
-                    url=f'http://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/{date.year}/0{date.month}/'
-                    f'MERGE_CPTEC_{date.year}0{date.month}0{date.day}.grib2',
-                    endereco=f'{path_save}',
-                    nome=f'MERGE_CPTEC_{date.year}0{date.month}0{date.day}')
-                    if to == "netcdf":
-                        df = xr.open_dataset(f"{path_save}/MERGE_CPTEC_{date.year}0{date.month}0{date.day}.grib2", engine="cfgrib")
-                        df.to_netcdf(f"{path_save}/MERGE_CPTEC_{date.year}0{date.month}0{date.day}.nc")
-                        os.remove(f"{path_save}/MERGE_CPTEC_{date.year}0{date.month}0{date.day}.grib2")
-                        os.system(f"rm {path_save}/*.idx")
-
-
-                else:
-                    download_file(
-                    url=f'http://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/{date.year}/0{date.month}/'
-                    f'MERGE_CPTEC_{date.year}0{date.month}{date.day}.grib2',
-                    endereco=f'{path_save}',
-                    nome=f'MERGE_CPTEC_{date.year}0{date.month}{date.day}')
-                    if to == "netcdf":
-                        df = xr.open_dataset(f"{path_save}/MERGE_CPTEC_{date.year}0{date.month}{date.day}.grib2", engine="cfgrib")
-                        df.to_netcdf(f"{path_save}/MERGE_CPTEC_{date.year}0{date.month}{date.day}.nc")
-                        os.remove(f"{path_save}/MERGE_CPTEC_{date.year}0{date.month}{date.day}.grib2")
-                        os.system(f"rm {path_save}/*.idx")
-
-
-            else:
-                if ( date.day < 10):
-                    download_file(
-                    url=f'http://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/{date.year}/{date.month}/'
-                    f'MERGE_CPTEC_{date.year}{date.month}0{date.day}.grib2',
-                    endereco=f'{path_save}',
-                    nome=f'MERGE_CPTEC_{date.year}{date.month}0{date.day}')
-                    if to == "netcdf":
-                        df = xr.open_dataset(f"{path_save}/MERGE_CPTEC_{date.year}{date.month}0{date.day}.grib2", engine="cfgrib")
-                        df.to_netcdf(f"{path_save}/MERGE_CPTEC_{date.year}{date.month}0{date.day}.nc")
-                        os.remove(f"{path_save}/MERGE_CPTEC_{date.year}{date.month}0{date.day}.grib2")
-                        os.system(f"rm {path_save}/*.idx")
-                else:
-                    download_file(
-                    url=f'http://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/{date.year}/{date.month}/'
-                    f'MERGE_CPTEC_{date.year}{date.month}{date.day}.grib2',
-                    endereco=f'{path_save}',
-                    nome=f'MERGE_CPTEC_{date.year}{date.month}{date.day}')
-                    if to == "netcdf":
-                        df = xr.open_dataset(f"{path_save}/MERGE_CPTEC_{date.year}{date.month}{date.day}.grib2", engine="cfgrib")
-                        df.to_netcdf(f"{path_save}/MERGE_CPTEC_{date.year}{date.month}{date.day}.nc")
-                        os.remove(f"{path_save}/MERGE_CPTEC_{date.year}{date.month}{date.day}.grib2")
-                        os.system(f"rm {path_save}/*.idx")
-        
+    def __init__(self, file=None):
+        if file!= None:
+            self.dataset = file
+    def __download_file(self, url, endereco, nome):
+        # access the site
+        resposta = requests.get(url)
+        # Get content and save it
+        if resposta.status_code == requests.codes.OK:
+            with open(endereco + f'/{nome}.grib2', 'wb') as novo:
+                novo.write(resposta.content)
         else:
-            #all the cases name of file to download
-            for ano in range(year_start, year_end):
-                for mes in range(1, 13):
-                    for dia in range(1, 32):
-                        # Criaremos um arquivo datetime com a data dos loops, se não existir, ignora
-                        try:
-                            # Como o padrão do site é "06" e não "6" ára mês e dia, são conversões
-                            if ano == 2000 and mes < 6:
-                                break
-                            time = datetime.datetime(ano, mes, dia)
-                            if time.day < 10:  # adiciona o 0 na frente do marcador mês
-                                if time.month < 10:  # Adicionamos 0 também
-                                    download_file(
-                                        url=f'http://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/{time.year}/0{time.month}/'
-                                            f'MERGE_CPTEC_{time.year}0{time.month}0{time.day}.grib2',
-                                        endereco=f'{path_save}',
-                                        nome=f'MERGE_CPTEC_{time.year}0{time.month}0{time.day}')
-                                else:
+            resposta.raise_for_status()
 
-                                    download_file(
-                                        url=f'http://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/{time.year}/{time.month}/'
-                                            f'MERGE_CPTEC_{time.year}{time.month}0{time.day}.grib2',
-                                        endereco=f'{path_save}',
-                                        nome=f'MERGE_CPTEC_{time.year}{time.month}0{time.day}')
-                            else:  # se pegamos dias maiores que 9
-                                if time.month < 10:  # Adicionamos 0 também
-                                    download_file(
-                                        url=f'http://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/{time.year}/0{time.month}/'
-                                            f'MERGE_CPTEC_{time.year}0{time.month}{time.day}.grib2',
-                                        endereco=f'{path_save}',
-                                        nome=f'MERGE_CPTEC_{time.year}0{time.month}{time.day}')
-                                else:
-                                    download_file(
-                                        url=f'http://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/{time.year}/{time.month}/'
-                                            f'MERGE_CPTEC_{time.year}{time.month}{time.day}.grib2',
-                                        endereco=f'{path_save}',
-                                        nome=f'MERGE_CPTEC_{time.year}{time.month}{time.day}')
-                            cont+=1
-                        except:
-                            continue
-                    print(f"{round((cont/total)*100)}% concluídos")
-            if to == "netcdf":
-                loc = os.listdir(path_save)
-                for i in loc:
-                    df = xr.open_dataset(f"{path_save}/{i}", engine="cfgrib")
-                    df.to_netcdf(f"{path_save}/{i[:-6]}.nc")
-                    os.remove(f"{path_save}/{i}")
-                os.system(f"rm {path_save}/*.idx")
+    def download2(self, path, start_year=2000,start_month=1, start_day=1,
+                        end_year=now.year, end_month=now.month, end_day=now.day):
+        start_dt = date(start_year, start_month, start_day).strftime('%Y-%m-%d')
+        end_dt = date(end_year, end_month, end_day).strftime('%Y-%m-%d')
+        files = []
+        for i in np.arange(start_dt, end_dt, dtype='datetime64[D]'):
+            print(i)
+            date_str_format = pd.to_datetime(i).strftime('%Y%m%d')
+            self.__download_file(
+                    url=f'http://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/{date_str_format[:-4]}/{date_str_format[4:-2]}/'
+                    f'MERGE_CPTEC_{date_str_format}.grib2',
+                    endereco=f'{path}',
+                    nome=f'MERGE_CPTEC_{date_str_format}')
+            files.append(f'{path}/MERGE_CPTEC_{date_str_format}')
+
+        df = xr.open_mfdataset(rf'{path}\*.grib2', engine="cfgrib")
+        df.to_netcdf(f"{path}\MERGE_CPTEC_{start_dt}_{end_dt}.nc")
+        os.system(rf"rm {path}\*.idx")
+        os.system(rf"rm {path}\*.grip2")
+      
     def to_netcdf(self, path):
         import xarray as xr
         loc = os.listdir(path)
@@ -133,6 +51,3 @@ class Merge:
         os.system(f"rm {path}/*.idx")
         df = xr.open_mfdataset(f"{path}/*.nc")
         os.system(f"rm {path}/*.idx")
-
-    def format2(self):
-        self.dataset = self.dataset
