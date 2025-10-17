@@ -8,6 +8,9 @@
  - **BR-DWGD** [https://github.com/AlexandreCandidoXavier/BR-DWGD]
  - **IDEAM** [http://www.ideam.gov.co]
 
+README from Merge
+[https://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/MERGE_READ-ME.pdf]
+
 **Usage**
 > pip install AgenciBr  
 
